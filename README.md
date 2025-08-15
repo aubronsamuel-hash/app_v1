@@ -13,3 +13,10 @@ Manual (no Docker):
   pip install -r backend\\requirements.txt
   pytest -q
   uvicorn app.main:app --host 0.0.0.0 --port 8001
+
+## Auth quickstart
+powershell:
+  $u = "http://localhost:8001"
+  Invoke-RestMethod -Uri "$u/auth/register" -Method Post -Body (@{username='alice';password='secret'} | ConvertTo-Json) -ContentType "application/json"
+  $tok = Invoke-RestMethod -Uri "$u/auth/token-json" -Method Post -Body (@{username='alice';password='secret'} | ConvertTo-Json) -ContentType "application/json"
+  Invoke-RestMethod -Uri "$u/auth/me" -Headers @{Authorization="Bearer $($tok.access_token)"}
