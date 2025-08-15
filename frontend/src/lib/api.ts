@@ -1,6 +1,6 @@
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
 
-function authHeader() {
+function authHeader(): HeadersInit {
   const t = localStorage.getItem("token");
   return t ? { Authorization: "Bearer " + t } : {};
 }
