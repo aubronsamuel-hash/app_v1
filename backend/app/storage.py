@@ -14,7 +14,7 @@ def _db_path() -> str:
 def _init_if_missing(path: str) -> None:
     if not os.path.exists(path):
         with open(path, "w", encoding="utf-8") as f:
-            json.dump({"users": [], "tokens": []}, f)
+            json.dump({"users": [], "tokens": [], "missions": [], "assignments": []}, f)
 
 def load_db() -> Dict[str, Any]:
     path = _db_path()
