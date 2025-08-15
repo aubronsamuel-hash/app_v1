@@ -30,6 +30,11 @@ Local:
 
 Set `VITE_API_URL` to point to the API (defaults to http://localhost:8001). Token persists in `localStorage`.
 
+## Environment variables
+- `DATA_DIR`: path for JSON storage (default `./data` with Docker)
+- `ALLOWED_ORIGINS`: comma-separated origins for CORS, `*` allows all (default `*`)
+- `TOKEN_TTL_HOURS`: token expiration in hours (default `24`)
+
 ## Auth quickstart
 powershell:
   $u = "http://localhost:8001"
