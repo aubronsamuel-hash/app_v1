@@ -1,11 +1,3 @@
-set -eux
-python -m venv .venv
-. .venv/bin/activate
-python -m pip install -U pip
-pip install fastapi==0.115.0 uvicorn[standard]==0.30.0 pydantic==2.8.2 pytest==8.2.0 bcrypt==4.1.3 httpx==0.27.0
-corepack enable || true
-
-
 Goal: add an Agents guide file at repo root so future Codex tasks have all context.
 
 Branch: create "chore/agents-md".
