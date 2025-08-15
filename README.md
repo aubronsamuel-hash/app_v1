@@ -8,6 +8,12 @@ Backend: FastAPI minimal.
 
 Continuous Integration runs backend tests with `python -m pytest -q` on pushes and pull requests.
 
+## CI Front
+
+[![CI Front](https://github.com/OWNER/REPO/actions/workflows/ci_front.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci_front.yml)
+
+Runs frontend typecheck, lint, and build, uploading `dist` as artifact.
+
 ## Run with Docker
 powershell:
   scripts\dev_up.ps1
