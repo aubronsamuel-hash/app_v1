@@ -74,3 +74,33 @@ class MissionUpdate(BaseModel):
 class MissionOut(MissionBase):
     id: int
     positions: List[PositionIn] = []
+
+
+class AssignmentIn(BaseModel):
+    role_label: str
+    user_id: int
+    status: str = "invited"
+
+    @field_validator("status")
+    @classmethod
+    def _valid_status_a(cls, v: str) -> str:
+        allowed = {"invited", "confirmed", "declined", "tentative"}
+        if v not in allowed:
+            raise ValueError("invalid status")
+        return v
+
+
+class AssignmentOut(BaseModel):
+    id: int
+    mission_id: int
+    user_id: int
+    role_label: str
+    status: str
+
+    @field_validator("status")
+    @classmethod
+    def _valid_status_o(cls, v: str) -> str:
+        allowed = {"invited", "confirmed", "declined", "tentative"}
+        if v not in allowed:
+            raise ValueError("invalid status")
+        return v

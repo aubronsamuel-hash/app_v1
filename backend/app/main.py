@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, missions
+from app.routers import auth, missions, assignments
 
 app = FastAPI(title="app_v1")
 
@@ -14,6 +14,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(missions.router)
+app.include_router(assignments.router)
 
 @app.get("/healthz")
 def healthz():
