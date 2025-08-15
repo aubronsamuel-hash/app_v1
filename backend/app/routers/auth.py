@@ -2,8 +2,9 @@ from fastapi import APIRouter, HTTPException, Header, Depends
 from typing import Optional, Dict, Any
 from app.storage import load_db, save_db
 from app.schemas import UserIn, UserOut, TokenOut, NotificationPrefsIn
+from app import config
 import secrets, bcrypt, os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 router = APIRouter()
 
@@ -62,6 +63,10 @@ def _current_user(authorization: Optional[str] = Header(None)) -> Dict[str, Any]
     t = next((t for t in db.get("tokens", []) if t["token"] == token), None)
     if not t:
         raise HTTPException(status_code=401, detail="Invalid token")
+    created_at = datetime.fromisoformat(t.get("created_at"))
+    ttl = timedelta(hours=config.TOKEN_TTL_HOURS)
+    if created_at + ttl <= datetime.now(timezone.utc):
+        raise HTTPException(status_code=401, detail="Token expired")
     user = next((u for u in db.get("users", []) if u["id"] == t["user_id"]), None)
     if not user or not user.get("is_active", True):
         raise HTTPException(status_code=401, detail="Inactive user")
