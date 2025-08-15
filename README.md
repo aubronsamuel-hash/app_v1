@@ -8,6 +8,10 @@ Backend: FastAPI minimal.
 
 Continuous Integration runs backend tests with `python -m pytest -q` on pushes and pull requests.
 
+## CI Front
+
+package-lock.json is committed in frontend/ and used for cache keys.
+
 ## Run with Docker
 powershell:
   scripts\dev_up.ps1
