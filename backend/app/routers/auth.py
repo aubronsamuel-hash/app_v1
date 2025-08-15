@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Header, Depends
 from typing import Optional, Dict, Any
 from app.storage import load_db, save_db
-from app.schemas import UserIn, UserOut, TokenOut
-import secrets, bcrypt
+from app.schemas import UserIn, UserOut, TokenOut, NotificationPrefsIn
+import secrets, bcrypt, os
 from datetime import datetime, timezone
 
 router = APIRouter()
@@ -75,3 +75,34 @@ def me(user: Dict[str, Any] = Depends(_current_user)):
         "role": user.get("role", "intermittent"),
         "is_active": user.get("is_active", True),
     }
+
+
+@router.put("/auth/me/prefs")
+def update_prefs(payload: NotificationPrefsIn, user: Dict[str, Any] = Depends(_current_user)):
+    db = load_db()
+    users = db.get("users", [])
+    idx = next((i for i, u in enumerate(users) if u.get("id") == user["id"]), None)
+    if idx is None:
+        raise HTTPException(status_code=404, detail="user not found")
+    prefs = payload.model_dump()
+    users[idx]["prefs"] = prefs
+    save_db(db)
+    return prefs
+
+
+@router.post("/auth/me/notify-test")
+def notify_test(user: Dict[str, Any] = Depends(_current_user)):
+    prefs = user.get("prefs", {}) or {}
+    channels = []
+    if prefs.get("email"):
+        channels.append("email")
+    if prefs.get("telegram") and prefs.get("telegram_chat_id"):
+        channels.append("telegram")
+    dry_run = os.environ.get("NOTIFY_DRY_RUN", "1") == "1"
+    if dry_run:
+        for ch in channels:
+            if ch == "email":
+                print(f"DRY RUN: would send email to {prefs.get('email')}")
+            elif ch == "telegram":
+                print(f"DRY RUN: would send telegram to {prefs.get('telegram_chat_id')}")
+    return {"ok": True, "dry_run": dry_run, "channels": channels}
