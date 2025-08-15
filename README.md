@@ -18,6 +18,18 @@ Manual (no Docker):
   pytest -q
   uvicorn app.main:app --host 0.0.0.0 --port 8001
 
+## Frontend
+Docker:
+  docker compose up -d --build
+  browse http://localhost:5173
+
+Local:
+  cd frontend
+  npm i
+  npm run dev
+
+Set `VITE_API_URL` to point to the API (defaults to http://localhost:8001). Token persists in `localStorage`.
+
 ## Auth quickstart
 powershell:
   $u = "http://localhost:8001"
