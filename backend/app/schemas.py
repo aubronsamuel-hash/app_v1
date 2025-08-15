@@ -10,6 +10,19 @@ class UserOut(BaseModel):
     id: int
     username: str
     role: str
+    is_active: bool
+
+
+class UserAdminUpdate(BaseModel):
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+
+    @field_validator("role")
+    @classmethod
+    def _valid_role(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in {"admin", "intermittent"}:
+            raise ValueError("invalid role")
+        return v
 
 class TokenOut(BaseModel):
     access_token: str

@@ -34,7 +34,12 @@ def register(payload: UserIn):
     }
     db["users"].append(user)
     save_db(db)
-    return {"id": next_id, "username": payload.username, "role": "intermittent"}
+    return {
+        "id": next_id,
+        "username": payload.username,
+        "role": "intermittent",
+        "is_active": True,
+    }
 
 @router.post("/auth/token-json", response_model=TokenOut)
 def token_json(payload: UserIn):
@@ -64,4 +69,9 @@ def _current_user(authorization: Optional[str] = Header(None)) -> Dict[str, Any]
 
 @router.get("/auth/me", response_model=UserOut)
 def me(user: Dict[str, Any] = Depends(_current_user)):
-    return {"id": user["id"], "username": user["username"], "role": user.get("role", "intermittent")}
+    return {
+        "id": user["id"],
+        "username": user["username"],
+        "role": user.get("role", "intermittent"),
+        "is_active": user.get("is_active", True),
+    }
