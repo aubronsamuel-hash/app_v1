@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app import config
-from app.routers import auth, missions, assignments, admin
+from app.routers import auth, missions, assignments, admin, admin_backup
 
 app = FastAPI(title="app_v1")
 
@@ -22,6 +22,7 @@ app.include_router(auth.router)
 app.include_router(missions.router)
 app.include_router(assignments.router)
 app.include_router(admin.router)
+app.include_router(admin_backup.router)
 
 @app.get("/healthz")
 def healthz():
