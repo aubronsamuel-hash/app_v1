@@ -103,6 +103,12 @@ $t = Invoke-RestMethod -Uri http://localhost:8001/auth/token-json -Method Post -
 $hdr = @{ Authorization = "Bearer $($t.access_token)" }
 Invoke-RestMethod -Uri http://localhost:8001/auth/me -Headers $hdr
 
+## Backup/Restore
+PowerShell:
+scripts\\backup.ps1
+scripts\\restore.ps1 -File backup_20240101_000000.json
+scripts\\restore.ps1 -File backup_20240101_000000.json -NoWipe
+
 ## Do and Do not (for agents)
 DO:
 - Keep tests green (pytest -q).

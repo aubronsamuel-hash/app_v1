@@ -77,3 +77,12 @@ bash:
 - `POST /auth/me/notify-test` (Bearer) test notification channels; returns `{ok,dry_run,channels}`
 - `GET /admin/notifications/diagnostic` (admin) count users with prefs
 - `POST /admin/notifications/diagnostic/test` (admin) dry-run test for all users
+
+## Backup/Restore
+- `GET /admin/backup` (admin) download JSON backup
+- `POST /admin/restore?wipe=true|false` (admin) restore from JSON; `wipe=false` merges
+powershell:
+  $env:TOKEN = "...admin token..."
+  scripts\backup.ps1
+  scripts\restore.ps1 -File backup_20240101_000000.json
+  scripts\restore.ps1 -File backup_20240101_000000.json -NoWipe
