@@ -1,5 +1,5 @@
 import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "app"))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from fastapi.testclient import TestClient
 from app.main import app
 
