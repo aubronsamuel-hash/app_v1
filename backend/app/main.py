@@ -5,10 +5,10 @@ from app.routers import auth, missions, assignments, admin
 
 app = FastAPI(title="app_v1")
 
-if config.ALLOWED_ORIGINS == "*":
+if config.CORS_ORIGINS == "*":
     origins = ["*"]
 else:
-    origins = [o.strip() for o in config.ALLOWED_ORIGINS.split(",") if o.strip()]
+    origins = [o.strip() for o in config.CORS_ORIGINS.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,

@@ -54,8 +54,8 @@ curl -s http://localhost:8001/healthz
 
 ## Environment variables
 - DATA_DIR (optional): overrides /data path inside API container.
-- ALLOWED_ORIGINS (optional): comma-separated CORS origins (default "*").
-- TOKEN_TTL_HOURS (optional): token expiration in hours (default 24).
+- CORS_ORIGINS (optional): comma-separated CORS origins (default "*").
+- TOKEN_TTL (optional): token expiration in minutes (default 1440).
 - VITE_API_URL (reserved for future frontend).
 
 ## Storage model (JSON at /data/data.json)
