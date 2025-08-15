@@ -1,65 +1,67 @@
-from __future__ import annotations
-
-from datetime import datetime, timezone
-import secrets
-
-import bcrypt
-from fastapi import APIRouter, HTTPException, Header
-
-from app.schemas import UserIn, UserOut, TokenOut
+from fastapi import APIRouter, HTTPException, Header, Depends
+from typing import Optional, Dict, Any
 from app.storage import load_db, save_db
+from app.schemas import UserIn, UserOut, TokenOut
+import secrets, bcrypt
+from datetime import datetime, timezone
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter()
 
+def _hash_password(pw: str) -> str:
+    return bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-@router.post("/register", response_model=UserOut)
-def register(user_in: UserIn) -> UserOut:
-    """Create a new user with a unique username and hashed password."""
+def _verify_password(pw: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(pw.encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return False
+
+def _new_token(user_id: int) -> str:
+    return "tok_{0}_{1}".format(user_id, secrets.token_hex(16))
+
+@router.post("/auth/register", response_model=UserOut)
+def register(payload: UserIn):
     db = load_db()
-    if any(u["username"] == user_in.username for u in db["users"]):
-        raise HTTPException(status_code=409, detail="nom d'utilisateur deja pris")
-    user_id = max([u["id"] for u in db["users"]] or [0]) + 1
-    password_hash = bcrypt.hashpw(user_in.password.encode(), bcrypt.gensalt()).decode()
+    if any(u["username"] == payload.username for u in db.get("users", [])):
+        raise HTTPException(status_code=409, detail="User already exists")
+    next_id = (max([u.get("id", 0) for u in db.get("users", [])]) + 1) if db.get("users") else 1
     user = {
-        "id": user_id,
-        "username": user_in.username,
-        "password_hash": password_hash,
+        "id": next_id,
+        "username": payload.username,
+        "password_hash": _hash_password(payload.password),
         "role": "intermittent",
         "is_active": True,
     }
     db["users"].append(user)
     save_db(db)
-    return UserOut(id=user_id, username=user_in.username, role="intermittent")
+    return {"id": next_id, "username": payload.username, "role": "intermittent"}
 
-
-@router.post("/token-json", response_model=TokenOut)
-def token_json(user_in: UserIn) -> TokenOut:
-    """Return an access token when provided valid user credentials."""
+@router.post("/auth/token-json", response_model=TokenOut)
+def token_json(payload: UserIn):
     db = load_db()
-    user = next((u for u in db["users"] if u["username"] == user_in.username), None)
-    if not user or not bcrypt.checkpw(user_in.password.encode(), user["password_hash"].encode()):
-        raise HTTPException(status_code=401, detail="identifiants invalides")
-    token = f"tok_{user['id']}_{secrets.token_hex(8)}"
-    db["tokens"].append({
-        "token": token,
-        "user_id": user["id"],
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
+    user = next((u for u in db.get("users", []) if u["username"] == payload.username), None)
+    if not user or not _verify_password(payload.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    tok = _new_token(user["id"])
+    db.setdefault("tokens", [])
+    db["tokens"] = [t for t in db["tokens"] if t.get("user_id") != user["id"]]
+    db["tokens"].append({"token": tok, "user_id": user["id"], "created_at": datetime.now(timezone.utc).isoformat()})
     save_db(db)
-    return TokenOut(access_token=token)
+    return {"access_token": tok}
 
-
-@router.get("/me", response_model=UserOut)
-def me(authorization: str | None = Header(None)) -> UserOut:
-    """Retrieve the current user from a bearer token."""
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="token invalide")
-    token = authorization.split()[1]
+def _current_user(authorization: Optional[str] = Header(None)) -> Dict[str, Any]:
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Token required")
+    token = authorization.split(" ", 1)[1].strip()
     db = load_db()
-    token_entry = next((t for t in db["tokens"] if t["token"] == token), None)
-    if not token_entry:
-        raise HTTPException(status_code=401, detail="token invalide")
-    user = next((u for u in db["users"] if u["id"] == token_entry["user_id"]), None)
-    if not user or not user.get("is_active", False):
-        raise HTTPException(status_code=401, detail="utilisateur inactif")
-    return UserOut(id=user["id"], username=user["username"], role=user["role"])
+    t = next((t for t in db.get("tokens", []) if t["token"] == token), None)
+    if not t:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user = next((u for u in db.get("users", []) if u["id"] == t["user_id"]), None)
+    if not user or not user.get("is_active", True):
+        raise HTTPException(status_code=401, detail="Inactive user")
+    return user
+
+@router.get("/auth/me", response_model=UserOut)
+def me(user: Dict[str, Any] = Depends(_current_user)):
+    return {"id": user["id"], "username": user["username"], "role": user.get("role", "intermittent")}
