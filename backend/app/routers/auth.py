@@ -14,6 +14,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserOut)
 def register(user_in: UserIn) -> UserOut:
+    """Create a new user with a unique username and hashed password."""
     db = load_db()
     if any(u["username"] == user_in.username for u in db["users"]):
         raise HTTPException(status_code=409, detail="nom d'utilisateur deja pris")
@@ -33,6 +34,7 @@ def register(user_in: UserIn) -> UserOut:
 
 @router.post("/token-json", response_model=TokenOut)
 def token_json(user_in: UserIn) -> TokenOut:
+    """Return an access token when provided valid user credentials."""
     db = load_db()
     user = next((u for u in db["users"] if u["username"] == user_in.username), None)
     if not user or not bcrypt.checkpw(user_in.password.encode(), user["password_hash"].encode()):
@@ -49,6 +51,7 @@ def token_json(user_in: UserIn) -> TokenOut:
 
 @router.get("/me", response_model=UserOut)
 def me(authorization: str | None = Header(None)) -> UserOut:
+    """Retrieve the current user from a bearer token."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="token invalide")
     token = authorization.split()[1]
