@@ -34,6 +34,9 @@ pytest==8.2.0
 bcrypt==4.1.3
 httpx==0.27.0
 
+## Requirements
+- Root requirements.txt includes backend/requirements.txt and is used by docker-compose to install dependencies.
+
 ## Local commands (Windows PowerShell)
 scripts\\dev_up.ps1
 scripts\\test_backend.ps1
