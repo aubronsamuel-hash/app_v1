@@ -40,3 +40,9 @@ curl:
   curl -X POST "$u/missions" -H "Authorization: Bearer $tok" -H "Content-Type: application/json" -d '{"title":"Show","start":"2025-08-16T08:00:00Z","end":"2025-08-16T12:00:00Z","positions":[]}'
 
 Note: POST/PUT/DELETE /missions endpoints require a Bearer token.
+
+## Notifications
+- `PUT /auth/me/prefs` (Bearer) store notification preferences `{email, telegram, telegram_chat_id}`
+- `POST /auth/me/notify-test` (Bearer) test notification channels; returns `{ok,dry_run,channels}`
+- `GET /admin/notifications/diagnostic` (admin) count users with prefs
+- `POST /admin/notifications/diagnostic/test` (admin) dry-run test for all users

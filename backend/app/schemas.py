@@ -28,6 +28,12 @@ class TokenOut(BaseModel):
     access_token: str
 
 
+class NotificationPrefsIn(BaseModel):
+    email: Optional[str] = None
+    telegram: Optional[bool] = None
+    telegram_chat_id: Optional[str] = None
+
+
 class PositionIn(BaseModel):
     label: str
     count: int = Field(ge=1)

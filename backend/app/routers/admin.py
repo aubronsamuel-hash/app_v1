@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from app.storage import load_db, save_db
 from app.schemas import UserOut, UserAdminUpdate
 from app.routers.auth import _current_user as current_user_dep
+import os
 
 router = APIRouter()
 
@@ -85,4 +86,41 @@ def reset(user: Dict[str, Any] = Depends(_admin_user)):
     db = {"users": [], "tokens": [], "missions": [], "assignments": []}
     save_db(db)
     return {"ok": True}
+
+
+def _users_with_prefs(db: Dict[str, Any]):
+    def has_prefs(u: Dict[str, Any]) -> bool:
+        prefs = u.get("prefs", {})
+        return any(prefs.get(k) for k in ["email", "telegram", "telegram_chat_id"])
+    return [u for u in db.get("users", []) if has_prefs(u)]
+
+
+@router.get("/admin/notifications/diagnostic")
+def notifications_diag(user: Dict[str, Any] = Depends(_admin_user)):
+    db = load_db()
+    users = _users_with_prefs(db)
+    return {"users_with_prefs": len(users)}
+
+
+@router.post("/admin/notifications/diagnostic/test")
+def notifications_diag_test(user: Dict[str, Any] = Depends(_admin_user)):
+    db = load_db()
+    users = _users_with_prefs(db)
+    dry_run = os.environ.get("NOTIFY_DRY_RUN", "1") == "1"
+    tested = 0
+    for u in users:
+        prefs = u.get("prefs", {})
+        channels = []
+        if prefs.get("email"):
+            channels.append("email")
+        if prefs.get("telegram") and prefs.get("telegram_chat_id"):
+            channels.append("telegram")
+        tested += 1
+        if dry_run:
+            for ch in channels:
+                if ch == "email":
+                    print(f"DRY RUN: would send email to {prefs.get('email')}")
+                elif ch == "telegram":
+                    print(f"DRY RUN: would send telegram to {prefs.get('telegram_chat_id')}")
+    return {"ok": True, "dry_run": dry_run, "tested": tested}
 
