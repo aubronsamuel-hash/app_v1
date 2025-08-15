@@ -1,0 +1,30 @@
+name: CI-Front
+on:
+  push: { branches: ["**"] }
+  pull_request: { branches: ["**"] }
+jobs:
+  front:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        working-directory: ./frontend
+        run: npm ci || npm i
+      - name: Typecheck
+        working-directory: ./frontend
+        run: npm run typecheck
+      - name: Lint
+        working-directory: ./frontend
+        run: npm run lint || echo "lint warnings"
+      - name: Build
+        working-directory: ./frontend
+        run: npm run build
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
