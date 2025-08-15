@@ -64,7 +64,7 @@ def _current_user(authorization: Optional[str] = Header(None)) -> Dict[str, Any]
     if not t:
         raise HTTPException(status_code=401, detail="Invalid token")
     created_at = datetime.fromisoformat(t.get("created_at"))
-    ttl = timedelta(hours=config.TOKEN_TTL_HOURS)
+    ttl = timedelta(minutes=config.TOKEN_TTL)
     if created_at + ttl <= datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Token expired")
     user = next((u for u in db.get("users", []) if u["id"] == t["user_id"]), None)
