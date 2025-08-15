@@ -1,9 +1,12 @@
 # app_v1
+
 [![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+
 Backend: FastAPI minimal.
 
 ## CI
-GitHub Actions runs `python -m pytest -q` for pushes and pull requests.
+
+Continuous Integration runs backend tests with `python -m pytest -q` on pushes and pull requests.
 
 ## Run with Docker
 powershell:
