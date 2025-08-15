@@ -1,0 +1,20 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# copy requirements into image and install once (build-time)
+COPY requirements.txt /tmp/requirements.txt
+COPY backend/requirements.txt /tmp/backend_requirements.txt
+RUN python -m pip install -U pip && \
+    pip install -r /tmp/requirements.txt
+
+# create runtime data dir
+RUN mkdir -p /data
+
+# code will be mounted in dev; keep a default workdir for uvicorn
+WORKDIR /app/backend
+
+CMD ["bash","-lc","uvicorn app.main:app --host 0.0.0.0 --port 8001"]

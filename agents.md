@@ -35,7 +35,8 @@ bcrypt==4.1.3
 httpx==0.27.0
 
 ## Requirements
-- Root requirements.txt includes backend/requirements.txt and is used by docker-compose to install dependencies.
+- Root requirements.txt includes backend/requirements.txt.
+- Dependencies are installed at build time via Dockerfile.api, so pytest and httpx are always present inside the container.
 
 ## Local commands (Windows PowerShell)
 scripts\\dev_up.ps1
