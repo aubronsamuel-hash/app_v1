@@ -41,6 +41,13 @@ curl:
 
 Note: POST/PUT/DELETE /missions endpoints require a Bearer token.
 
+## Seeding demo
+powershell:
+  scripts\seed_demo.ps1
+bash:
+  docker compose up -d --build
+  docker compose exec api python backend/scripts/seed_plus.py --reset --users 10 --missions 6 --days 14 --force-insert
+
 ## Notifications
 - `PUT /auth/me/prefs` (Bearer) store notification preferences `{email, telegram, telegram_chat_id}`
 - `POST /auth/me/notify-test` (Bearer) test notification channels; returns `{ok,dry_run,channels}`
